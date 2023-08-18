@@ -1,0 +1,134 @@
+---
+title: "Penguin"
+format: html
+editor: visual
+---
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+library(ggbeeswarm)
+library(broom)
+library(visdat)
+# library(nullabor)
+library(ggplot2)
+```
+
+a.  
+
+```{r}
+glimpse(penguins)
+```
+
+b.  
+
+```{r}
+?palmerpenguins
+```
+
+c.  
+
+```{r}
+vis_dat(penguins)
+```
+
+Missing values in gender and flipper length, body mass, bill length, bill depth.
+
+d.  Check the distributions of each species on each of the size variables, using a jittered dotplot, using the geom_quasirandom() function in the ggbeeswarm package. There seems to be some bimodality in some species on some variables eg bill_length_mm. Why do you think this might be? Check your thinking by making a suitable plot.
+
+```{r}
+#?geom_quasirandom
+
+ggplot(penguins,
+       aes(x = species, 
+           y = bill_length_mm,
+           color = sex)) + 
+  geom_quasirandom() +
+  scale_color_brewer("", palette = "Dark2") +
+  coord_flip()
+```
+
+Distribution of Adelie normal, but not for Gentoo and Chinstrap becuz of 2 peaks (bimodality). This happens becuz the difference between gender (male and female). Gentoo and Chinstrap: male \> female in general. Each gender among each species, the distribution of Gentoo and Chinstrap is right skewed, Adelie left skewed.
+
+```{r}
+ggplot(penguins,
+       aes(x = species, 
+           y = flipper_length_mm,
+           color = sex)) + 
+  geom_quasirandom() +
+  scale_color_brewer("", palette = "Dark2") +
+  coord_flip()
+```
+
+```{r}
+ggplot(penguins,
+       aes(x = species, 
+           y = body_mass_g,
+           color = sex)) + 
+  geom_quasirandom() +
+  scale_color_brewer("", palette = "Dark2") +
+  coord_flip()
+```
+
+Adelie's distribution has no outliers.
+
+f.  Make a scatterplot of body_mass_g vs flipper_length_mm for all the penguins. What do the vertical stripes indicate? Are there any other unusual patterns to note, such as outliers or clustering or nonlinearity?
+
+```{r}
+ggplot(penguins,
+       aes(x = flipper_length_mm, 
+           y = body_mass_g)) +
+  geom_point()
+```
+
+the vertical stripes indicate that the number is rounded.
+
+g.  How well can penguin body mass be predicted based on the flipper length? Fit a linear model to check. Report the equation, the , , and make a residual plot of residuals vs flipper_length_mm. From the residual plot, are there any concerns about the model fit?
+
+```{r}
+penguins_nona <- penguins %>% na.omit()
+penguins_fit <- lm(body_mass_g ~ flipper_length_mm,
+                   data = penguins_nona)
+tidy(penguins_fit)
+
+```
+
+```{r}
+# Bodymass = -5872 + flipper_length_mm * 50
+
+flipper_length_mm <- 200
+-5872 + flipper_length_mm * 50
+
+# 4128g +- 770g (CI)
+```
+
+```{r}
+glance(penguins_fit)
+
+#lower CI? mean + Tcrit *sd
+
+1.96 *393
+```
+
+Residual plot:
+
+```{r}
+penguins_m <- augment (penguins_fit)
+ggplot (penguins_m, aes (x=flipper_length_mm, y=.resid)) +
+  geom_hline(yintercept=1, colour="grey70") +
+  geom_point() +
+  theme (aspect.ratio=1)
+```
+
+negative rls left group, positive for right group.
+
+Exercise 2: Can we believe what we see? a.
+
+
+"True data in position 14", if we cannot find the true plot, then the true plot is good.
+
+b.  Pick one group, males or females, and one of Adelie, Chinstrap or Gentoo, and choose two of the four measurements. Fit a linear model, and do a lineup of the residuals. Can you tell which is the true plot? Show your lineup to your tutorial partner or someone else nearby and ask them to pick the plot that is most different. explain why they picked that plot. Using your decrypt() code locate the true plot. Is the true plot different from the nulls?
+
+Did you or your friend choose the data plot? Was it identifiable from the lineup or indistinguishable from the null plots?
+
+CAnnot guess the true plot, they are all similar.
